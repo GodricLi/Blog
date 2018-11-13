@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <link rel="stylesheet" href="/static/blog/bootstrap-3.3.7/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/blog/css/register.css">
+</head>
+<body>
+<h3>注册页面</h3>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-lg-offset-3">
+            <form id="form">
+                {% csrf_token %}
+
+                {% for filed in form %}
+                    <div class="form-group">
+                        {#设置for与filed一致#}
+                        <label for="{{ filed.auto_id }}">{{ filed.label }}</label>
+                        {{ filed }}<span class="error pull-right"></span>
+                    </div>
+                {% endfor %}
+                <div class="form-group">
+                    <label for="avatar">头像
+                        <img src="/static/blog/img/default.jpg" height="80" width="80" id="avatar_img">
+                    </label>
+                    <input type="file" id="avatar">
+                </div>
+                <input type="button" class="btn btn-default " value="提交" id="reg_btn"><span class="error"></span>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+
+</body>
+<script src="/static/js/jquery-3.3.1.js"></script>
+<script src="/static/blog/js/register.js">
+</script>
+</html>

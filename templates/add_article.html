@@ -1,0 +1,42 @@
+{% extends 'blog_backend.html' %}
+{% block content %}
+    <style type="text/css">
+
+    </style>
+    <div class="article_editor">
+        {% block editor %}
+            <form method="post">
+                {% csrf_token %}
+                <div>
+                    <label for="">标题</label>
+                    <div>
+                        <input type="text" name="title" style="width: 800px">
+                    </div>
+                </div>
+                <div>
+                    <label for="">内容(kindeditor编辑器，不支持拖放/粘贴上传图片)</label>
+                    <div>
+                    <textarea id="article_content" name="content"></textarea>
+                    </div>
+                    <input type="submit">
+                </div>
+            </form>
+        {% endblock editor %}
+    </div>
+    <script src="/static/js/jquery-3.3.1.js"></script>
+    <script charset="utf-8" src="/static/blog/kindeditor/kindeditor-all.js"></script>
+    <script>
+        KindEditor.ready(function (K) {
+            window.editor = K.create('#article_content', {
+                width: '800px',
+                height: '400px',
+                uploadJson: '/upload/',
+                extraFileUploadParams: {
+                    csrfmiddlewaretoken: $('[name="csrfmiddlewaretoken"]').val()
+                }
+
+            });
+
+        });
+    </script>
+{% endblock content %}

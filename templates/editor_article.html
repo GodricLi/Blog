@@ -1,0 +1,23 @@
+{% extends 'add_article.html' %}
+
+{% block editor %}
+    <form method="post">
+        {% csrf_token %}
+        <div>
+            <label for="">标题</label>
+            <div>
+                <input type="text" name="title" style="width: 800px" value="{{ article_obj.title }}">
+            </div>
+        </div>
+        <div>
+            <label for="">内容(kindeditor编辑器，不支持拖放/粘贴上传图片)</label>
+            <div>
+                    <textarea id="article_content" name="content">
+                        {{ article_obj.content }}
+                    </textarea>
+            </div>
+            <input type="submit">
+        </div>
+    </form>
+
+{% endblock editor %}

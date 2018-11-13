@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>博客后台 - 博客园</title>
+    <link rel="icon" href="/static/blog/img/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/static/blog/bootstrap-3.3.7/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/blog/css/blog_backend.css">
+</head>
+<body>
+<div id="top_nav">
+    <div id="left">
+        « <a href="http://127.0.0.1:8000/index/">网站首页</a><a href="#">园子</a><a href="#">新闻</a><a
+            href="#">博问</a><a href="#">闪存</a><a href="#">收藏</a><a
+            href="#">搜索</a>
+    </div>
+    <div id="right"><a id="user_nav_blog_link" href="/{{ request.user.username }}">{{ request.user.username }}</a>·<a
+            href="#">短消息<span id="msg_count"></span></a>·<a href="#">设置</a>·<a href="/logout/">退出</a><span
+            id="current_spaceId" style="display:none">1342983</span></div>
+    <div class="clear"></div>
+</div>
+<div id="main" class="clearfix">
+    <div id="Header">
+        <div id="SiteNav"><a href="#">修改密码</a>&nbsp;|&nbsp;<a
+                href="#">备份</a>&nbsp;|&nbsp;<a href="#">模板</a>
+        </div>
+        <div id="BlogTitle"><a id="BlogTitleLink"
+                               href="/{{ request.user.username }}">{{ request.user.username }}</a>
+        </div>
+        <div id="SiteTitle">
+            <a id="TitleLink" href="#"><img src="/static/blog/img/adminlogo.gif"
+                                            alt=""></a>
+        </div>
+        <div class="clear"></div>
+    </div>
+    <div id="main_body">
+        <div class="clear"></div>
+        <div id="main_wrap">
+            <div id="main_container">
+                <div id="tab_nav">
+                    <ul>
+                        <li><a id="TabPosts" href="#" class="current_nav">随笔</a></li>
+                        <li><a id="TabPosts" href="#" class="current_nav">文章</a></li>
+                    </ul>
+                    <div class="clear"></div>
+                </div>
+                <div id="sub_nav">
+                    &nbsp;
+                </div>
+                {% block content %}
+                    <div id="content_area">
+                        <div id="post_list">
+                            <table cellspacing="0" cellpadding="0" border="0">
+                                <tbody>
+                                <tr>
+                                    <th class="post-title">标题</th>
+                                    <th class="publish-status">发布状态</th>
+                                    <th>评论数</th>
+                                    <th>点赞数</th>
+                                    <th>操作</th>
+                                    <th>操作</th>
+                                </tr>
+                                {% for article in current_page_data %}
+                                    <tr id="post-row">
+                                        <td class="post-title"><a
+                                                href="/{{ request.user.username }}/articles/{{ article.pk }}"
+                                                id="post_title_link">{{ article.title }}</a>({{ article.create_time|date:"Y-m-d H:i" }})
+                                        </td>
+                                        <td>发布</td>
+                                        <td>{{ article.comment_count }}</td>
+                                        <td>{{ article.up_count }}</td>
+                                        <td><a href="/{{ article.pk }}/editor/">编辑</a></td>
+                                        <td><a href="/{{ article.pk }}/delete/">删除</a></td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pager">
+
+                            {% if current_page_data.has_previous %}
+                                <a href="?page={{ current_page_data.previous_page_number }}"><span><&nbsp;Prev</span></a>
+                            {% else %}
+                                <a style="display:none;"><span><&nbsp;Prev</span></a>
+                            {% endif %}
+
+                            {% for item in page_range %}
+                                {% if current_page_num == item %}
+                                    <a href="?page={{ item }}" class="p_1 current">{{ item }}</a>
+                                {% else %}
+                                    <a href="?page={{ item }}">{{ item }}</a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if current_page_data.has_next %}
+                                <a href="?page={{ current_page_data.next_page_number }}"><span>Next &nbsp;></span></a>
+                            {% else %}
+                                <a style="display: none"><span>Next &nbsp;> </span></a>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+                {% endblock %}
+            </div>
+        </div>
+        <div id="left_container">
+            <div id="left_nav">
+                <h2>操作</h2>
+                <ul>
+                    <li><a href="/add_article/">添加新文章</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

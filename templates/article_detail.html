@@ -1,0 +1,210 @@
+{% extends  'base.html' %}
+
+
+{% block content %}
+    {% csrf_token %}
+
+    <div class="article_info">
+        <h3 class="text-center">{{ article_obj.title }}</h3>
+
+        <div class="content">
+            {{ article_obj.content |safe }}
+        </div>
+
+        <div class="clearfix">
+            <div id="div_digg">
+                <div class="diggit action">
+                    <span class="diggnum " id="digg_count">{{ article_obj.up_count }}</span>
+                </div>
+                <div class="buryit action">
+                    <span class="burynum" id="bury_count">{{ article_obj.down_count }}</span>
+                </div>
+                <div class="clear"></div>
+                <div class="diggword" id="digg_tips">
+                </div>
+            </div>
+        </div>
+
+
+        <div class="comment">
+            <h4 class="tree_btn"><a href="javascript:;">评论树∨</a></h4>
+            <div class="comment_tree well">
+            </div>
+            <h4>评论列表</h4>
+            <hr>
+            <div class="comment_list">
+                {% for comment in comment_list %}
+                    <div>
+                        <div>
+                            <span><a href="">#{{ forloop.counter }}楼</a></span>&nbsp;
+                            <span>{{ comment.create_time|date:"Y-m-d H:i" }}</span>&nbsp;
+                            <span><a href="">{{ comment.user.username }}</a></span>
+                            <span class="pull-right"><a class="reply" name="{{ comment.user.username }}"
+                                                        comment_pk="{{ comment.pk }}">回复</a></span>
+                        </div>
+
+                        {% if comment.parent_comment %}
+                            <div class="well">
+                                <p>
+                                    {{ comment.parent_comment.user.username }}:{{ comment.parent_comment.content }}
+                                </p>
+                            </div>
+                        {% endif %}
+                        <div style="margin-top: 10px">
+                            {{ comment.content }}
+                        </div>
+                        <hr>
+                    </div>
+                {% endfor %}
+            </div>
+            <p>发表评论</p>
+            <p>
+                昵称：<input type="text" id="tbCommentAuthor" class="author" size="50" disabled="disabled"
+                          value="{{ request.user.username }}">
+            </p>
+            <p>
+                <textarea name="" id="comment_content" cols="60" rows="10"></textarea>
+            </p>
+            <button class="btn btn-default comment_btn">提交评论</button>
+        </div>
+    </div>
+
+    <script src="/static/js/jquery-3.3.1.js"></script>
+    <script>
+        //点赞ajax事件
+        $('#div_digg .action').click(function () {
+            var is_up = $(this).hasClass('diggit');
+
+            $obj = $(this).children(); //取到点击的action的子元素span标签，$对象
+
+            $.ajax({
+                url: "/like/",
+                type: "post",
+                data: {
+                    "csrfmiddlewaretoken": $("[name='csrfmiddlewaretoken']").val(),
+                    "is_up": is_up,
+                    "article_id": "{{ article_obj.pk }}"
+                },
+                success: function (data) {
+
+                    if (data.status) {
+                        var count = parseInt($obj.text());
+                        $obj.text(count + 1)
+
+                    }
+                    else {
+                        var val = data.tips ? '您已经推荐过' : '您已经反对过'; //data.tips为true赋值？后面的，否则赋值：后面
+
+                        $('#digg_tips').html(val);
+
+                        setTimeout(function () {
+                            $('#digg_tips').html("")
+                        }, 3000)
+                    }
+                }
+            })
+
+        });
+
+
+        //评论ajax事件
+        var pid = "";
+        $('.comment_btn').click(function () {
+
+            var comment = $('#comment_content').val();
+
+            if (pid) {
+
+                var index = comment.indexOf("\n");  //取到索引，截取换行符后面的内容
+                comment = comment.slice(index + 1)
+            }
+
+            $.ajax({
+                url: "/comment/",
+                type: "post",
+                data: {
+                    "csrfmiddlewaretoken": $("[name='csrfmiddlewaretoken']").val(),
+                    "article_id": "{{ article_obj.pk }}",
+                    "comment": comment,
+                    "pid": pid
+                },
+                success: function (data) {
+                    console.log(data);
+
+                    //评论后清空评论框
+                    pid = "";
+                    $('#comment_content').val("");
+
+
+                    //ajax添加评论
+                    var create_time = data.create_time;
+                    var comment = data.comment;
+                    var username = data.username;
+
+                    var comment_content = `<div>
+                    <div>
+
+                        <span>${create_time}</span>&nbsp;
+                        <span><a href="">${username}</a></span>
+                        <span class="pull-right"><a href="">回复</a></span>
+                    </div>
+                    <div style="margin-top: 10px">
+                        ${comment}
+                    </div>
+                    <hr>
+                </div>`;
+
+                    $('.comment_list').append(comment_content)
+
+                }
+            })
+        });
+
+        //评论回复事件，子评论
+        $('.reply').click(function () {
+            //取到评论人的username拼接后放到评论框里面
+
+            $('#comment_content').focus();
+
+            var user = '@' + $(this).attr("name") + '\n';
+
+            $('#comment_content').val(user);
+
+            pid = $(this).attr('comment_pk');
+        });
+
+        //评论树ajax事件
+        $('.tree_btn').click(function () {
+
+            $.ajax({
+                url: "/get_comment_tree/",
+                type: "get",
+                data: {
+                    article_id:{{ article_obj.pk }}
+                },
+                success: function (data) {
+                    console.log(data);
+
+                    $.each(data, function (index, comment_obj) {
+                        var pk = comment_obj.pk;
+                        var content = comment_obj.content;
+                        var parent_comment = comment_obj.parent_comment;
+                        var val = '<div class="comment_item" comment_id=' + pk + '><span>' + content + '</span></div>' + '<hr>';
+
+                        if (!parent_comment) {
+
+                            $('.comment_tree').append(val)
+
+                        } else {
+                            $("[comment_id=" + parent_comment + "]").append(val)
+                            //选取子评论的comment_id=parent_comment的父评论进行添加
+
+                        }
+                    })
+
+
+                }
+            })
+        })
+    </script>
+{% endblock %}

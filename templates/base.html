@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ user.username }} - 博客园</title>
+    <link rel="icon" href="/static/blog/img/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/static/blog/css/home_site.css">
+    <link rel="stylesheet" href="/static/blog/css/article_detail.css">
+    <link rel="stylesheet" href="/static/blog/bootstrap-3.3.7/css/bootstrap.css">
+
+</head>
+<body>
+{% block backend %}
+
+    <div class="header">
+        <div class="content">
+            <p class="title">{{ blog.title }}
+                <span><a href="/blog_backend/" class="backend">管理</a></span>
+            </p>
+        </div>
+
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                {% load my_tags %}
+                {% get_classification_style username %}
+            </div>
+            {% block content %}
+                <div class="col-md-9">
+                </div>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock backend %}
+
+</body>
+</html>
